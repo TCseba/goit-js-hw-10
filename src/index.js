@@ -1,26 +1,35 @@
+import SlimSelect from 'slim-select';
+import 'slim-select/dist/slimselect.css';
+import Notiflix from 'notiflix';
+
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const breedSelect = document.querySelector('.breed-select');
+  const breedSelectElement = document.querySelector('.breed-select');
+  const breedSelect = new SlimSelect({
+    select: breedSelectElement
+  });
+
   const loader = document.querySelector('.loader');
   const error = document.querySelector('.error');
   const catInfo = document.querySelector('.cat-info');
 
   loader.style.display = 'block';
-  breedSelect.style.display = 'none';
+  breedSelectElement.style.display = 'none';
   error.style.display = 'none';
 
   try {
     const breeds = await fetchBreeds();
-    breedSelect.innerHTML = breeds.map(breed => `<option value="${breed.id}">${breed.name}</option>`).join('');
-    breedSelect.style.display = 'block';
+    breedSelect.setData(breeds.map(breed => ({ text: breed.name, value: breed.id })));
+    breedSelectElement.style.display = 'block';
   } catch (err) {
-    error.style.display = 'block';
+      Notiflix.Notify.failure('Oooops!Something is NOK')
+   // error.style.display = 'block';
   } finally {
     loader.style.display = 'none';
   }
 
-  breedSelect.addEventListener('change', async (event) => {
+  breedSelectElement.addEventListener('change', async (event) => {
     const breedId = event.target.value;
     loader.style.display = 'block';
     catInfo.style.display = 'none';
@@ -37,7 +46,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
       catInfo.style.display = 'block';
     } catch (err) {
-      error.style.display = 'block';
+      Notiflix.Notify.failure('Oooops!Something is NOK')
+        //error.style.display = 'block';
     } finally {
       loader.style.display = 'none';
     }
