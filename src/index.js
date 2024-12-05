@@ -1,0 +1,45 @@
+import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const breedSelect = document.querySelector('.breed-select');
+  const loader = document.querySelector('.loader');
+  const error = document.querySelector('.error');
+  const catInfo = document.querySelector('.cat-info');
+
+  loader.style.display = 'block';
+  breedSelect.style.display = 'none';
+  error.style.display = 'none';
+
+  try {
+    const breeds = await fetchBreeds();
+    breedSelect.innerHTML = breeds.map(breed => `<option value="${breed.id}">${breed.name}</option>`).join('');
+    breedSelect.style.display = 'block';
+  } catch (err) {
+    error.style.display = 'block';
+  } finally {
+    loader.style.display = 'none';
+  }
+
+  breedSelect.addEventListener('change', async (event) => {
+    const breedId = event.target.value;
+    loader.style.display = 'block';
+    catInfo.style.display = 'none';
+    error.style.display = 'none';
+
+    try {
+      const catData = await fetchCatByBreed(breedId);
+      const cat = catData[0];
+      catInfo.innerHTML = `
+        <img src="${cat.url}" alt="${cat.breeds[0].name}" />
+        <h2>${cat.breeds[0].name}</h2>
+        <p>${cat.breeds[0].description}</p>
+        <p><strong>Temperament:</strong> ${cat.breeds[0].temperament}</p>
+      `;
+      catInfo.style.display = 'block';
+    } catch (err) {
+      error.style.display = 'block';
+    } finally {
+      loader.style.display = 'none';
+    }
+  });
+});
